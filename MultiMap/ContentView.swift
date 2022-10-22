@@ -25,28 +25,19 @@ struct ContentView: View {
                     .tag(location)
             }
             .frame(minWidth: 200)
-            VStack {
-                HStack {
-                    TextField("Search for something…", text: $searchText)
-                        .onSubmit (runSearch)
-                    Button("Go", action: runSearch)
+            Map(coordinateRegion: $region, annotationItems: locations) {
+                location in MapAnnotation(coordinate: location.coordinate) {
+                    Text(location.name)
+                        .font(.headline)
+                        .padding(5)
+                        .padding(.horizontal, 5)
+                        .background(.black)
+                        .foregroundColor(.white)
+                        .clipShape(Capsule())
                 }
-                .padding([.top, .horizontal])
-                Map(coordinateRegion: $region, annotationItems: locations) {
-                    location in MapAnnotation(coordinate: location.coordinate) {
-                        Text(location.name)
-                            .font(.headline)
-                            .padding(5)
-                            .padding(.horizontal, 5)
-                            .background(.black)
-                            .foregroundColor(.white)
-                            .clipShape(Capsule())
-                    }
-                    
-                }
-                .frame(minWidth: 400, minHeight: 400)
-                .padding()
+                
             }
+            .ignoresSafeArea()
             .onChange(of: selectedLocations) { _ in
                 var visibleMap = MKMapRect.null
                 
@@ -62,6 +53,10 @@ struct ContentView: View {
                 region = newRegion
             }
         }
+        .searchable(text: $searchText, placement: .sidebar)
+        .onSubmit (of: .search, runSearch)
+        
+        
     }
     
     func runSearch() {
