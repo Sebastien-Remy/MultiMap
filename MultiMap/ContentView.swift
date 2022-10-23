@@ -40,8 +40,12 @@ struct ContentView: View {
             
             Map(coordinateRegion: $region, annotationItems: locations) {
                 location in MapAnnotation(coordinate: location.coordinate) {
-                    Text(location.name)
-                        .font(.headline)
+                    VStack {
+                        Text(location.name)
+                            .font(.headline)
+                        Text(location.country)
+                            .font(.footnote)
+                    }
                         .padding(5)
                         .padding(.horizontal, 5)
                         .background(.black)
@@ -83,10 +87,16 @@ struct ContentView: View {
             guard let response = response else { return }
             guard let item = response.mapItems.first else { return }
             guard let itemName = item.name, let itemLocation = item.placemark.location else { return }
-            let newLocation = Location(name: itemName, latitude: itemLocation.coordinate.latitude, longitude: itemLocation.coordinate.longitude)
+            guard let itemCountry = item.placemark.country else { return }
+            let newLocation = Location(name: itemName, country: itemCountry, latitude: itemLocation.coordinate.latitude, longitude: itemLocation.coordinate.longitude)
             
-            locations.append(newLocation)
-            selectedLocations = [newLocation]
+            if let existingLocation = locations.first(where: {location in return location == newLocation})
+            {
+                selectedLocations = [existingLocation]
+            } else {
+                locations.append(newLocation)
+                selectedLocations = [newLocation]
+            }
             searchText=""
         }
     }

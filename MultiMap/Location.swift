@@ -10,6 +10,7 @@ import MapKit
 struct Location: Identifiable, Hashable {
     let id = UUID()
     let name: String
+    let country: String
     let latitude: Double
     let longitude: Double
     
@@ -20,4 +21,9 @@ struct Location: Identifiable, Hashable {
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
     }
+    
+    static func == (lhs: Location, rhs: Location) -> Bool {
+        return lhs.name == rhs.name
+    }
+
 }
