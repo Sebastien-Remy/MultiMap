@@ -10,7 +10,7 @@ import MapKit
 
 struct ContentView: View {
     
-    @State private var searchText = ""
+    @AppStorage("searchText") private var searchText = ""
     @State private var locations = [Location]()
     @State private var selectedLocations = Set<Location>()
     
@@ -20,11 +20,24 @@ struct ContentView: View {
     
     var body: some View {
         NavigationView {
+            
             List(locations, selection: $selectedLocations) { location in
                 Text(location.name)
                     .tag(location)
+                    .contextMenu {
+                        Button("Delete", role: .destructive) {
+                            delete(location)
+                        }
+                    }
+            }
+            .onDeleteCommand {
+                for location in selectedLocations {
+                    delete(location)
+                }
             }
             .frame(minWidth: 200)
+       
+            
             Map(coordinateRegion: $region, annotationItems: locations) {
                 location in MapAnnotation(coordinate: location.coordinate) {
                     Text(location.name)
@@ -37,6 +50,7 @@ struct ContentView: View {
                 }
                 
             }
+            
             .ignoresSafeArea()
             .onChange(of: selectedLocations) { _ in
                 var visibleMap = MKMapRect.null
@@ -50,7 +64,9 @@ struct ContentView: View {
                 var newRegion = MKCoordinateRegion(visibleMap)
                 newRegion.span.latitudeDelta *= 1.5
                 newRegion.span.longitudeDelta *= 1.5
-                region = newRegion
+                withAnimation {
+                    region = newRegion
+                }
             }
         }
         .searchable(text: $searchText, placement: .sidebar)
@@ -71,7 +87,13 @@ struct ContentView: View {
             
             locations.append(newLocation)
             selectedLocations = [newLocation]
+            searchText=""
         }
+    }
+    
+    func delete (_ location: Location) {
+        guard let index = locations.firstIndex(of: location) else { return }
+        locations.remove(at: index)
     }
 }
 
